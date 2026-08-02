@@ -1,0 +1,67 @@
+:root {
+  --busitema-blue: #003366;
+  --busitema-gold: #ffd700;
+  --light-gray: #f4f7f6;
+}
+
+.dashboard-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.side-nav {
+  width: 260px;
+  background-color: var(--busitema-blue);
+  color: white;
+  padding: 20px;
+}
+.campus-badge {
+  background-color: var(--busitema-gold);
+  color: var(--busitema-blue);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 40px;
+}
+
+.feed-header {
+  color: var(--busitema-blue);
+  border-bottom: 2px solid var(--busitema-gold);
+  display: inline-block;
+  padding-bottom: 10px;
+}
+
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin-top: 30px;
+}
+
+.nav-links li {
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.nav-links li:hover {
+  color: var(--busitema-gold);
+}
+
+.logout-btn {
+  padding: 5px;
+  background-color: rgb(255, 0, 0);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.logout-btn:hover {
+  background-color: rgb(201, 0, 0);
+}
