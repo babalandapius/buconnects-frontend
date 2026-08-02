@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import './style.css';
 import logo from './assets/bu-CONNECTS-logo.png';
+import API_BASE_URL from "./apiConfig";
 
 const JoinPage = ({ onJoinSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,6 +14,7 @@ const JoinPage = ({ onJoinSuccess }) => {
   const [otp, setOtp] = useState("");
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [otpMessage, setOtpMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const savedUser = localStorage.getItem('buUser');
   const savedPic = savedUser ? JSON.parse(savedUser).profile_pic_url : null;
@@ -29,7 +31,6 @@ const JoinPage = ({ onJoinSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 1. Email & Password Validation
     if (!email || !email.includes('@')) {
       return alert("Please enter a valid email address.");
     }
@@ -37,19 +38,20 @@ const JoinPage = ({ onJoinSuccess }) => {
       return alert("Password must be at least 6 characters long.");
     }
 
-    if (!isLogin) {
-      // REGISTRATION FLOW
-      if (!name) return alert("Username is required");
-      if (!phoneNumber) return alert("Phone number is required");
-      
-      // Clean phone number string (removes spaces/dashes if any)
-      const cleanedPhone = phoneNumber.replace(/[\s-]/g, '');
-      if (cleanedPhone.length < 9) {
-        return alert("Please enter a valid phone number.");
-      }
+    setLoading(true);
 
-      try {
-        const response = await fetch('http://localhost:5000/api/register', {
+    try {
+      if (!isLogin) {
+        // --- REGISTER ---
+        if (!name) return alert("Username is required");
+        if (!phoneNumber) return alert("Phone number is required");
+
+        const cleanedPhone = phoneNumber.replace(/[\s-]/g, '');
+        if (cleanedPhone.length < 9) {
+          return alert("Please enter a valid phone number.");
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password, campus, phone_number: cleanedPhone })
@@ -59,18 +61,13 @@ const JoinPage = ({ onJoinSuccess }) => {
 
         if (response.ok) {
           setOtpSent(true);
-          setOtpMessage("Account created! Verify your phone number to proceed.");
+          setOtpMessage(data.message || "Account created! Verify your phone number.");
         } else {
           alert(data.message || "Registration failed");
         }
-      } catch (error) {
-        console.error("Fetch error:", error);
-        alert("Could not connect to the backend server.");
-      }
-    } else {
-      // LOGIN FLOW
-      try {
-        const response = await fetch('http://localhost:5000/api/login', {
+      } else {
+        // --- LOGIN ---
+        const response = await fetch(`${API_BASE_URL}/api/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -79,42 +76,49 @@ const JoinPage = ({ onJoinSuccess }) => {
         const data = await response.json();
 
         if (response.ok) {
-          onJoinSuccess(data.user || data);
+          const userObj = data.user || data;
+          localStorage.setItem('buUser', JSON.stringify(userObj));
+          if (typeof onJoinSuccess === 'function') {
+            onJoinSuccess(userObj);
+          }
         } else if (data.phone_not_verified) {
           alert(data.message || "Phone not verified.");
           setIsLogin(false);
           setOtpSent(true);
+          setOtpMessage("Enter the verification code sent to your phone/email.");
         } else {
           alert(data.message || "Invalid credentials");
         }
-      } catch (error) {
-        console.error("Fetch error:", error);
-        alert("Could not connect to the backend server.");
       }
+    } catch (error) {
+      console.error("Submission Error:", error);
+      alert("Could not connect to backend server.");
+    } finally {
+      setLoading(false); // Guarantees button unlocks
     }
   };
 
   const handleSendOtp = async () => {
-    if (!phoneNumber && !email) {
-      return alert("Please provide your phone number or email.");
+    if (!email) {
+      return alert("Please enter your email to resend OTP.");
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/send-otp', {
+      const response = await fetch(`${API_BASE_URL}/api/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone_number: phoneNumber, email })
+        body: JSON.stringify({ email })
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setOtpMessage("OTP sent! Please enter it below.");
+        setOtpMessage("New OTP sent! Please check your terminal/inbox.");
       } else {
         alert(data.message || "Failed to send OTP");
       }
     } catch (error) {
-      console.error("Fetch error:", error);
+      console.error("Resend OTP Error:", error);
       alert("Failed to send OTP");
     }
   };
@@ -126,7 +130,7 @@ const JoinPage = ({ onJoinSuccess }) => {
 
     setVerifyingOtp(true);
     try {
-      const response = await fetch('http://localhost:5000/api/verify-otp', {
+      const response = await fetch(`${API_BASE_URL}/api/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp })
@@ -144,10 +148,11 @@ const JoinPage = ({ onJoinSuccess }) => {
         alert(data.message || "OTP verification failed");
       }
     } catch (error) {
-      console.error("Fetch error:", error);
+      console.error("Verify OTP Error:", error);
       alert("Failed to verify OTP");
+    } finally {
+      setVerifyingOtp(false);
     }
-    setVerifyingOtp(false);
   };
 
   return (
@@ -160,7 +165,7 @@ const JoinPage = ({ onJoinSuccess }) => {
         {savedPic && (
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
             <img
-              src={`http://localhost:5000${savedPic}`}
+              src={`${API_BASE_URL}${savedPic}`}
               alt="Profile"
               style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }}
             />
@@ -254,12 +259,10 @@ const JoinPage = ({ onJoinSuccess }) => {
               </select>
             )}
 
-            {/* Explicit submit button */}
-            <button type="submit" className="post-button" style={{ marginTop: '15px' }}>
-              {isLogin ? "Login" : "Register"}
+            <button type="submit" className="post-button" disabled={loading} style={{ marginTop: '15px' }}>
+              {loading ? "Processing..." : (isLogin ? "Login" : "Register")}
             </button>
 
-            {/* Toggle Mode */}
             <p
               onClick={() => setIsLogin(!isLogin)}
               style={{ cursor: 'pointer', color: '#007bff', marginTop: '15px', textAlign: 'center' }}

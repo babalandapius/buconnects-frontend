@@ -12,7 +12,7 @@ const ConversationsList = ({ currentUserId, onSelectUser }) => {
       }
 
       try {
-        const res = await fetch(`http://localhost:5000/api/chats/conversations/${currentUserId}`);
+        const res = await fetch(`API_BASE_URL/api/chats/conversations/${currentUserId}`);
         if (res.ok) {
           const data = await res.json();
           setConversations(Array.isArray(data) ? data : []);
@@ -45,7 +45,7 @@ const ConversationsList = ({ currentUserId, onSelectUser }) => {
             <div className="avatar-wrapper">
               {chatUser.profile_pic_url ? (
                 <img 
-                  src={`http://localhost:5000${chatUser.profile_pic_url}`} 
+                  src={`API_BASE_URL${chatUser.profile_pic_url}`} 
                   alt="" 
                   className="chat-avatar"
                   onError={(e) => { e.target.style.display = 'none'; }} 

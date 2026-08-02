@@ -19,7 +19,7 @@ function App() {
     const syncUser = async () => {
       if (user && user.id) {
         try {
-          const response = await fetch(`http://localhost:5000/api/user/${user.id}`);
+          const response = await fetch(`API_BASE_URL/api/user/${user.id}`);
           if (response.ok) {
             const latestData = await response.json();
             setUser(latestData);
