@@ -147,7 +147,7 @@ const totalUnreadCount = Object.values(unreadCounts).reduce((sum, count) => sum 
     console.log("Fetching conversations for user ID:", userId);
     
     // Request endpoint using user ID
-    const res = await fetch(`API_BASE_URL/api/chats/conversations/${userId}`);
+    const res = await fetch(`${API_BASE_URL}/api/chats/conversations/${userId}`);
     
     if (!res.ok) {
       console.error('Failed to fetch conversations. Server status:', res.status);
@@ -258,7 +258,7 @@ useEffect(() => {
     setLoadingPosts(true);
     if (reset) setHasMore(true);
     try {
-      const response = await fetch(`API_BASE_URL/api/posts?campus=${user.campus}&page=${nextPage}&limit=20`);
+      const response = await fetch(`${API_BASE_URL}/api/posts?campus=${user.campus}&page=${nextPage}&limit=20`);
       const data = await response.json();
       if (data.length < 20) setHasMore(false);
       setPosts(prev => {
@@ -292,7 +292,7 @@ useEffect(() => {
     if (selectedFile) formData.append('media', selectedFile);
 
     try {
-      const response = await fetch('API_BASE_URL/api/posts', {
+      const response = await fetch(`${API_BASE_URL}/api/posts`, {
         method: 'POST',
         body: formData,
       });
@@ -307,7 +307,7 @@ useEffect(() => {
 
   const handleDeletePost = async (postId) => {
     if (window.confirm("Are you sure?")) {
-      await fetch(`API_BASE_URL/api/posts/${postId}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/api/posts/${postId}`, { method: 'DELETE' });
       fetchPosts();
     }
   };
@@ -315,7 +315,7 @@ useEffect(() => {
   // --- FUNCTIONS: SETTINGS & PROFILE ---
   const handleUpdateSettings = async () => {
     try {
-      const response = await fetch('API_BASE_URL/api/settings', {
+      const response = await fetch(`${API_BASE_URL}/api/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -337,14 +337,14 @@ useEffect(() => {
     formData.append('image', profileFile);
     formData.append('userId', user.id);
     try {
-      const response = await fetch('API_BASE_URL/api/user/profile-pic', {
+      const response = await fetch(`${API_BASE_URL}/api/user/profile-pic`, {
         method: 'POST',
         body: formData,
       });
       if (response.ok) {
         // backend may not return user; fetch latest data explicitly
         try {
-          const userRes = await fetch(`API_BASE_URL/api/user/${user.id}`);
+          const userRes = await fetch(`${API_BASE_URL}/api/user/${user.id}`);
           if (userRes.ok) {
             const latest = await userRes.json();
             onUpdateUser(latest);
@@ -383,7 +383,7 @@ useEffect(() => {
         setMarketHasMore(true);
       }
       const query = buildMarketQuery(pageNumber);
-      const res = await fetch(`API_BASE_URL/api/market?${query}`);
+      const res = await fetch(`${API_BASE_URL}/api/market?${query}`);
       const data = await res.json();
       setMarketItems(prev => (reset ? data : [...prev, ...data]));
       if (data.length < 20) setMarketHasMore(false);
@@ -397,7 +397,7 @@ useEffect(() => {
   const fetchHostels = async () => {
     setHostelsLoading(true);
     try {
-      const res = await fetch('API_BASE_URL/api/hostels');
+      const res = await fetch(`${API_BASE_URL}/api/hostels`);
       if (res.ok) {
         const data = await res.json();
         setHostels(Array.isArray(data) ? data : []);
@@ -413,7 +413,7 @@ useEffect(() => {
 
   const fetchAnnouncements = async () => {
     try {
-      const res = await fetch(`API_BASE_URL/api/announcements?campus=${user.campus}`);
+      const res = await fetch(`${API_BASE_URL}/api/announcements?campus=${user.campus}`);
       const data = await res.json();
       setAnnouncements(data);
     } catch (e) {
@@ -431,7 +431,7 @@ useEffect(() => {
     if (marketFile) formData.append('image', marketFile);
 
     try {
-      const res = await fetch('API_BASE_URL/api/market', { method: 'POST', body: formData });
+      const res = await fetch(`${API_BASE_URL}/api/market`, { method: 'POST', body: formData });
       if (res.ok) {
         setShowMarketForm(false);
         setItemData({ name: '', price: '', description: '' });
@@ -462,7 +462,7 @@ useEffect(() => {
     if (hostelFile) formData.append('image', hostelFile);
 
     try {
-      const res = await fetch('API_BASE_URL/api/hostels', { method: 'POST', body: formData });
+      const res = await fetch(`${API_BASE_URL}/api/hostels`, { method: 'POST', body: formData });
       if (res.ok) {
         setShowHostelForm(false);
         setHostelData({ name: '', location: '', description: '', price: '', contact: '' });
@@ -480,7 +480,7 @@ useEffect(() => {
   };
 
   const handlePostAnnouncement = async () => {
-    const res = await fetch('API_BASE_URL/api/announcements', {
+    const res = await fetch(`${API_BASE_URL}/api/announcements`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...announcementData, poster: user.name })
@@ -494,7 +494,7 @@ useEffect(() => {
 
   const fetchComments = async (postId) => {
     try {
-      const res = await fetch(`API_BASE_URL/api/posts/${postId}/comments`);
+      const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments`);
       const data = await res.json();
       const normalized = data.map(comment => ({
         id: comment.id,
@@ -511,7 +511,7 @@ useEffect(() => {
     const text = (commentDrafts[postId] || '').trim();
     if (!text) return;
     try {
-      const response = await fetch('API_BASE_URL/api/posts/comment', {
+      const response = await fetch(`${API_BASE_URL}/api/posts/comment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ postId, userName: user.name, text })
@@ -532,7 +532,7 @@ useEffect(() => {
   const handleDeleteComment = async (postId, commentId) => {
     if (!window.confirm('Delete this comment?')) return;
     try {
-      const response = await fetch(`API_BASE_URL/api/posts/comment/${commentId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts/comment/${commentId}`, {
         method: 'DELETE'
       });
       if (response.ok) {
@@ -547,12 +547,12 @@ useEffect(() => {
   };
 
   const fetchEvents = async () => {
-    const res = await fetch(`API_BASE_URL/api/events?campus=${user.campus}`);
+    const res = await fetch(`${API_BASE_URL}/api/events?campus=${user.campus}`);
     setEvents(await res.json());
   };
 
   const fetchNotifications = async () => {
-    const res = await fetch(`API_BASE_URL/api/notifications/${user.id}`);
+    const res = await fetch(`${API_BASE_URL}/api/notifications/${user.id}`);
     setNotifications(await res.json());
   };
 
@@ -658,7 +658,7 @@ useEffect(() => {
     if (activeTab === 'announcements') fetchAnnouncements();
     if (activeTab === 'notifications') {
       const markReadAndLoad = async () => {
-        await fetch(`API_BASE_URL/api/notifications/read/${user.id}`, { method: 'PUT' });
+        await fetch(`${API_BASE_URL}/api/notifications/read/${user.id}`, { method: 'PUT' });
         fetchNotifications();
         setNotifications(prev => prev.map(notification => ({ ...notification, is_read: true })));
       };
@@ -715,7 +715,7 @@ useEffect(() => {
         <div className="user-profile">
           {user.profile_pic_url && (
             <img
-              src={`API_BASE_URL${user.profile_pic_url}`}
+              src={`${API_BASE_URL}${user.profile_pic_url}`}
               alt="avatar"
               className="sidebar-avatar"
             />
@@ -757,7 +757,7 @@ useEffect(() => {
             <div className="slider-inner">
               <button className="slider-arrow left" onClick={() => setCurrentSlide((currentSlide - 1 + recentUpdateImages.length) % recentUpdateImages.length)}>‹</button>
               <img
-                src={`API_BASE_URL${recentUpdateImages[currentSlide].media_url}`}
+                src={`${API_BASE_URL}${recentUpdateImages[currentSlide].media_url}`}
                 alt="highlight"
                 className="slider-img"
                 onClick={() => { setSelectedMediaPost(recentUpdateImages[currentSlide]); setShowMediaModal(true); }}
@@ -819,10 +819,10 @@ useEffect(() => {
           <div className="post-media-container" onClick={() => { setSelectedMediaPost(post); setShowMediaModal(true); }}>
             {post?.media_type === 'video' ? (
               <video controls className="post-media-content">
-                <source src={`API_BASE_URL${post.media_url}`} type="video/mp4" />
+                <source src={`${API_BASE_URL}${post.media_url}`} type="video/mp4" />
               </video>
             ) : (
-              <img src={`API_BASE_URL${post.media_url}`} alt="post" className="post-media-content" />
+              <img src={`${API_BASE_URL}${post.media_url}`} alt="post" className="post-media-content" />
             )}
           </div>
         )}
@@ -844,7 +844,7 @@ useEffect(() => {
               });
               // Send to backend
               try {
-                await fetch('API_BASE_URL/api/posts/like', {
+                await fetch(`${API_BASE_URL}/api/posts/like`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ postId: post.id, userId: user?.id })
@@ -1028,7 +1028,7 @@ useEffect(() => {
               {marketItems.map((item) => (
                 <div key={item.id} className="market-card">
                   <div className="item-img-container">
-                    {item.image_url ? <img src={`API_BASE_URL${item.image_url}`} className="item-img" alt="item" /> : <div className="item-img-placeholder">🛒</div>}
+                    {item.image_url ? <img src={`${API_BASE_URL}${item.image_url}`} className="item-img" alt="item" /> : <div className="item-img-placeholder">🛒</div>}
                   </div>
                   <div className="item-info">
                     <div className="market-card-header">
@@ -1091,7 +1091,7 @@ useEffect(() => {
               {hostels.map((hostel, index) => (
                 <div key={hostel.id || index} className="market-card">
                   <div className="item-img-container">
-                    {hostel.image_url ? <img src={`API_BASE_URL${hostel.image_url}`} className="item-img" alt="hostel" /> : <div className="item-img-placeholder">🏠</div>}
+                    {hostel.image_url ? <img src={`${API_BASE_URL}${hostel.image_url}`} className="item-img" alt="hostel" /> : <div className="item-img-placeholder">🏠</div>}
                   </div>
                   <div className="item-info">
                     <div className="market-card-header">
@@ -1107,7 +1107,7 @@ useEffect(() => {
                             return copy;
                           });
                           // API call
-                          fetch(`API_BASE_URL/api/hostels/${hostel.id}/like`, { method: 'POST' });
+                          fetch(`${API_BASE_URL}/api/hostels/${hostel.id}/like`, { method: 'POST' });
                         }}
                       >
                         {likedHostels.has(hostel.id) ? '💖' : '🤍'} {hostel.likes || 0}
@@ -1137,7 +1137,7 @@ useEffect(() => {
                 <input type="text" placeholder="Title" onChange={(e) => setEventData({ ...eventData, title: e.target.value })} />
                 <input type="date" onChange={(e) => setEventData({ ...eventData, event_date: e.target.value })} />
                 <button className="post-button" onClick={async () => {
-                  await fetch('API_BASE_URL/api/events', {
+                  await fetch(`${API_BASE_URL}/api/events`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...eventData, campus: user.campus })
@@ -1210,7 +1210,7 @@ useEffect(() => {
                 {user.profile_pic_url && !selectedFile && (
                   <div className="avatar-preview">
                     <img
-                      src={`API_BASE_URL${user.profile_pic_url}`}
+                      src={`${API_BASE_URL}${user.profile_pic_url}`}
                       alt="current"
                       style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }}
                     />
@@ -1348,10 +1348,10 @@ useEffect(() => {
       <div className="modal-media-container">
         {selectedMediaPost.media_type === 'video' ? (
           <video controls className="modal-media">
-            <source src={`API_BASE_URL${selectedMediaPost.media_url}`} type="video/mp4" />
+            <source src={`${API_BASE_URL}${selectedMediaPost.media_url}`} type="video/mp4" />
           </video>
         ) : (
-          <img src={`API_BASE_URL${selectedMediaPost.media_url}`} alt="post" className="modal-media" />
+          <img src={`${API_BASE_URL}${selectedMediaPost.media_url}`} alt="post" className="modal-media" />
         )}
       </div>
       
@@ -1382,7 +1382,7 @@ useEffect(() => {
                 return newSet;
               });
               // API call for like
-              await fetch(`API_BASE_URL/api/posts/${selectedMediaPost.id}/like`, { method: 'POST' });
+              await fetch(`${API_BASE_URL}/api/posts/${selectedMediaPost.id}/like`, { method: 'POST' });
             }}
           >
             {likedPosts.has(selectedMediaPost.id) ? '❤️' : '🤍'} {likedPosts.has(selectedMediaPost.id) ? 'Liked' : 'Like'}
