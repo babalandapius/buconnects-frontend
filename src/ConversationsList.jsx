@@ -12,7 +12,7 @@ const ConversationsList = ({ currentUserId, onSelectUser }) => {
       }
 
       try {
-        const res = await fetch(`API_BASE_URL/api/chats/conversations/${currentUserId}`);
+        const res = await fetch(`${API_BASE_URL}/api/chats/conversations/${currentUserId}`);
         if (res.ok) {
           const data = await res.json();
           setConversations(Array.isArray(data) ? data : []);
