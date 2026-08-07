@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import './style.css';
 import logo from './assets/bu-CONNECTS-logo.png';
-import API_BASE_URL from "./apiConfig";
+import API_BASE_URL from "./apiConfig.js";
 
 const JoinPage = ({ onJoinSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -92,7 +92,7 @@ const JoinPage = ({ onJoinSuccess }) => {
       }
     } catch (error) {
       console.error("Submission Error:", error);
-      alert("Could not connect to backend server.");
+      alert("Could not connect to backend server.", error);
     } finally {
       setLoading(false); // Guarantees button unlocks
     }
