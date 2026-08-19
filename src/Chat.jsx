@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Chat.css'; // Ensure CSS is imported
+import API_BASE_URL from './apiConfig.js';
 
 const Chat = ({ currentUser, receiver, onBack }) => {
   const [messages, setMessages] = useState([]);
@@ -20,16 +21,23 @@ const Chat = ({ currentUser, receiver, onBack }) => {
   // 1. Fetch real message history between currentUser & receiver
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!currentUser?.id || !receiver?.id) return;
+      if (!currentUser?.id || !receiver?.id) {
+        setMessages([]);
+        return;
+      }
+
       try {
-        const res = await fetch(`API_BASE_URL/api/chats/messages/${currentUser.id}/${receiver.id}`);
+        const res = await fetch(`${API_BASE_URL}/api/chats/messages/${currentUser.id}/${receiver.id}`);
         if (res.ok) {
           const data = await res.json();
-          setMessages(data);
+          setMessages(Array.isArray(data) ? data : []);
           scrollToBottom();
+        } else {
+          setMessages([]);
         }
       } catch (err) {
         console.error("Error loading message thread:", err);
+        setMessages([]);
       }
     };
 
@@ -52,7 +60,7 @@ const Chat = ({ currentUser, receiver, onBack }) => {
     };
 
     try {
-      const res = await fetch('API_BASE_URL/api/chats/send', {
+      const res = await fetch(`${API_BASE_URL}/api/chats/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(messageData)
@@ -124,7 +132,7 @@ const Chat = ({ currentUser, receiver, onBack }) => {
   formData.append('receiver_name', receiver.name || '');
 
   try {
-    const res = await fetch('API_BASE_URL/api/chats/upload-audio', {
+    const res = await fetch(`${API_BASE_URL}/api/chats/upload-audio`, {
       method: 'POST',
       body: formData
     });
@@ -154,7 +162,7 @@ const Chat = ({ currentUser, receiver, onBack }) => {
               <div key={msg.id || idx} className={`message-bubble-wrapper ${isMe ? 'outgoing' : 'incoming'}`}>
                 <div className="message-bubble">
                   {msg.audio_url ? (
-                    <audio controls src={`API_BASE_URL${msg.audio_url}`} />
+                    <audio controls src={`${API_BASE_URL}${msg.audio_url}`} />
                   ) : (
                     <p>{msg.message_text}</p>
                   )}

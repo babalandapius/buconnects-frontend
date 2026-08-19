@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import API_BASE_URL from './apiConfig.js';
 
 const ConversationsList = ({ currentUserId, onSelectUser }) => {
   const [conversations, setConversations] = useState([]);
@@ -45,7 +46,7 @@ const ConversationsList = ({ currentUserId, onSelectUser }) => {
             <div className="avatar-wrapper">
               {chatUser.profile_pic_url ? (
                 <img 
-                  src={`API_BASE_URL${chatUser.profile_pic_url}`} 
+                  src={`${API_BASE_URL}${chatUser.profile_pic_url}`} 
                   alt="" 
                   className="chat-avatar"
                   onError={(e) => { e.target.style.display = 'none'; }} 

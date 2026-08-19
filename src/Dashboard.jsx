@@ -32,18 +32,42 @@ const Dashboard = ({ user, onLogout, onUpdateUser }) => {
   const [settingsData, setSettingsData] = useState({ motto: user?.motto || "", password: "" });
 
   const openChatWith = (partner) => {
-  setActiveChatUser(partner);
-  setIsChatOpen(true);
+    const normalizedPartner = (() => {
+      if (!partner) return null;
+      if (typeof partner === 'object') {
+        return {
+          id: partner.id ?? partner.user_id ?? null,
+          name: partner.name ?? partner.partner ?? 'Unknown User',
+          profile_pic_url: partner.profile_pic_url ?? partner.profile_pic ?? null,
+        };
+      }
 
-  // Clear unread count for this partner
-  setConversations(prev =>
-    (Array.isArray(prev) ? prev : []).map(c =>
-      (c.partner === partner.partner || c.partner === partner.name)
-        ? { ...c, incomingCount: 0 }
-        : c
-    )
-  );
-};
+      const found = (Array.isArray(conversations) ? conversations : []).find((c) => {
+        const candidateName = c?.name ?? c?.partner;
+        return candidateName === partner || c?.partner_id === partner || c?.id === partner;
+      });
+
+      if (found) {
+        return {
+          id: found.id ?? found.partner_id ?? null,
+          name: found.name ?? found.partner ?? partner,
+          profile_pic_url: found.profile_pic_url ?? found.profile_pic ?? null,
+        };
+      }
+
+      return { id: null, name: partner, profile_pic_url: null };
+    })();
+
+    setActiveChatUser(normalizedPartner);
+    setIsChatOpen(true);
+
+    setConversations(prev =>
+      (Array.isArray(prev) ? prev : []).map(c => {
+        const currentPartner = c?.partner ?? c?.name;
+        return currentPartner === normalizedPartner?.name ? { ...c, incomingCount: 0 } : c;
+      })
+    );
+  };
 
   const [showMarketForm, setShowMarketForm] = useState(false);
   const [itemData, setItemData] = useState({ name: '', price: '', description: '' });
@@ -1336,7 +1360,17 @@ useEffect(() => {
   </div>
 
 
-  <Chat currentUser={user.name} receiverName={selectedChatPartner} />
+  {activeChatUser ? (
+    <Chat currentUser={user} receiver={activeChatUser} />
+  ) : (
+    <ConversationsList
+      currentUserId={user?.id}
+      onSelectUser={(selectedUser) => {
+        setActiveChatUser(selectedUser);
+        setIsChatOpen(true);
+      }}
+    />
+  )}
 </aside>
 
 {/* Media Modal Overlay */}

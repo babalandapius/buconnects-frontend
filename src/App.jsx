@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react' // Added useEffect
 import './App.css'
 import JoinPage from './JoinPage.jsx'
 import Dashboard from './Dashboard.jsx'
+import API_BASE_URL from './apiConfig.js'
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -19,7 +20,7 @@ function App() {
     const syncUser = async () => {
       if (user && user.id) {
         try {
-          const response = await fetch(`API_BASE_URL/api/user/${user.id}`);
+          const response = await fetch(`${API_BASE_URL}/api/user/${user.id}`);
           if (response.ok) {
             const latestData = await response.json();
             setUser(latestData);
